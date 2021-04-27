@@ -12,6 +12,8 @@ public class Platformer : MonoBehaviour
     public Collider2D ground_collider;
     public LayerMask groundLayer;
 
+    public Vector2 speed_limit;
+
     private float jump_timer;
     private float x;
     private float time_since_grounded;
@@ -30,6 +32,7 @@ public class Platformer : MonoBehaviour
     {
         x = Input.GetAxisRaw("Horizontal");
         Jump();
+        EnforceSpeedLimit();
     }
     void FixedUpdate()
     {
@@ -52,7 +55,7 @@ public class Platformer : MonoBehaviour
         if (jump_timer > set_jump_timer)
         {
             float jump = Input.GetAxisRaw("Jump");
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + (jump * jump_power * jump_timer * Time.deltaTime));
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + (jump * jump_power * (1.0f - time_since_grounded) * Time.deltaTime));
             if(jump < 0.1)
             {
                 jump_timer = -1.0f;
@@ -70,6 +73,18 @@ public class Platformer : MonoBehaviour
         } else
         {
             time_since_grounded += Time.deltaTime;
+        }
+    }
+
+    void EnforceSpeedLimit()
+    {
+        if(rb.velocity.x > speed_limit.x)
+        {
+            rb.velocity = new Vector2(speed_limit.x, rb.velocity.y);
+        }
+        if (rb.velocity.y > speed_limit.y)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, speed_limit.y);
         }
     }
 }
